@@ -37,6 +37,9 @@ do_install_append_virtclass-native() {
 	ln -s ${bindir}/jamvm ${D}${bindir}/java
 }
 
+# We really have valid non-symlink .so files
+INSANE_SKIP_${PN} = "dev-so"
+
 PRIVATE_LIBS = "libjvm.so"
 
 FILES_${PN} += "${libdir}/jamvm/lib*.so"
