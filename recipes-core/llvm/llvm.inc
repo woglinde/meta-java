@@ -203,12 +203,12 @@ def get_llvm_arch(d):
     arch = "X86"
   elif arch == "arm":
     arch = "ARM"
-  elif arch == "mipsel":
-    arch = "Mips"
+  elif arch == "mipsel" or arch == "mips":
+    arch = "mips"
   elif arch == "powerpc":
     arch = "PowerPC"
   else:
-    oefatal("Your target architecture is not supported by this recipe");
+    bb.error("%s does not support %s yet" % (bb.data.getVar('PN', d, 1), arch) );
 
   return arch
 
