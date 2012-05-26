@@ -91,6 +91,7 @@ ICEDTEAPATCHES = "\
 	file://icedtea-fix-xrender.patch;apply=no \
 	file://icedtea-shark-arm-linux-cpu-detection.patch;apply=no \
 	file://icedtea-corba-parallel-make.patch;apply=no \
+        file://icedtea-remove_sparc_compiler_option.patch;apply=no \
 	"
 
 ICEDTEAPATCHES_append_libc-uclibc = " \
@@ -114,6 +115,7 @@ DISTRIBUTION_PATCHES = "\
 	patches/icedtea-fix-xrender.patch \
 	patches/icedtea-shark-arm-linux-cpu-detection.patch \
 	patches/icedtea-corba-parallel-make.patch \
+        patches/icedtea-remove_sparc_compiler_option.patch \
 	"
 
 DISTRIBUTION_PATCHES_append_libc-uclibc = "\
