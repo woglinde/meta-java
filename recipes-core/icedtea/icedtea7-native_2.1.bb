@@ -1,6 +1,6 @@
 require openjdk-7-release-03b147.inc
 
-PR = "${INC_PR}.0"
+PR = "${INC_PR}.1"
 
 ICEDTEA = "icedtea-2.1"
 

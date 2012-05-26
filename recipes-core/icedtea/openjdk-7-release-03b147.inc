@@ -81,6 +81,7 @@ OPENJDK_PATCHES = " \
         file://icedtea-hotspot-make-arch-sane-for-x86.patch;apply=no \
         file://icedtea-jdk-sane-x86-arch.patch;apply=no \
 	file://icedtea-flags.patch;apply=no \
+        file://icedtea-remove_sparc_compiler_option.patch;apply=no \
         "
 
 #	file://icedtea-disable-desktop-dirs.patch;apply=no \
@@ -93,6 +94,7 @@ export DISTRIBUTION_PATCHES = " \
         patches/icedtea-hotspot-make-arch-sane-for-x86.patch \
         patches/icedtea-jdk-sane-x86-arch.patch \
 	patches/icedtea-flags.patch \
+        patches/icedtea-remove_sparc_compiler_option.patch \
         "
 
 #	patches/icedtea-disable-desktop-dirs.patch \
