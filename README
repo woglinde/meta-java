@@ -13,8 +13,19 @@ You should define at lease the following variables in a distro include file or l
 PREFERRED_PROVIDER_virtual/java-native = "jamvm-native"
 PREFERRED_PROVIDER_virtual/javac-native = "ecj-bootstrap-native"
 
+for openjdk6:
 PREFERRED_VERSION_openjdk-6-jre = "6b24-1.11.1"
 PREFERRED_VERSION_icedtea6-native = "1.8.11"
+
+for openjdk7:
+PREFERRED_VERSION_openjdk-6-jre = "03b21-2.1.1"
+PREFERRED_VERSION_icedtea7-native = "2.1"
+
+ATTENTION!
+
+for openjdk7 you need this patch applied to oe-core, otherwise rpath's are wrong
+
+http://patches.openembedded.org/patch/24461/
 
 Please note that libstdc++ static is needed on your host to compile icedtea6-native
 (install libstdc++-static on a Fedora).
