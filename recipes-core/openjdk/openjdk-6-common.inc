@@ -37,7 +37,7 @@ DEPENDS = "giflib libpng jpeg cups \
 	   alsa-lib libffi llvm2.8 \
            ant-native \
            fastjar-native \
-	   icedtea6-native \
+	   icedtea7-native \
            zip-native \
           "
 
@@ -82,12 +82,12 @@ EXTRA_OECONF = "\
 	--disable-pulse-java \
 	\
 	--with-ecj-jar=${STAGING_DATADIR_JAVA_NATIVE}/ecj-bootstrap.jar \
-	--with-java=${STAGING_LIBDIR_JVM_NATIVE}/icedtea6-native/bin/java \
-	--with-javac=${STAGING_LIBDIR_JVM_NATIVE}/icedtea6-native/bin/javac \
-	--with-javah=${STAGING_LIBDIR_JVM_NATIVE}/icedtea6-native/bin/javah \
-	--with-jar=${STAGING_LIBDIR_JVM_NATIVE}/icedtea6-native/bin/jar \
-	--with-rmic=${STAGING_LIBDIR_JVM_NATIVE}/icedtea6-native/bin/rmic \
-	--with-native2ascii=${STAGING_LIBDIR_JVM_NATIVE}/icedtea6-native/bin/native2ascii \
+	--with-java=${STAGING_LIBDIR_JVM_NATIVE}/icedtea7-native/bin/java \
+	--with-javac=${STAGING_LIBDIR_JVM_NATIVE}/icedtea7-native/bin/javac \
+	--with-javah=${STAGING_LIBDIR_JVM_NATIVE}/icedtea7-native/bin/javah \
+	--with-jar=${STAGING_LIBDIR_JVM_NATIVE}/icedtea7-native/bin/jar \
+	--with-rmic=${STAGING_LIBDIR_JVM_NATIVE}/icedtea7-native/bin/rmic \
+	--with-native2ascii=${STAGING_LIBDIR_JVM_NATIVE}/icedtea7-native/bin/native2ascii \
 	--with-rhino=${STAGING_DATADIR_JAVA}/rhino.jar \
 	--without-ant-home \
 	--with-openjdk-src-dir=${WORKDIR}/openjdk-src-dir \
@@ -168,14 +168,14 @@ do_configure_prepend() {
   find ${WORKDIR} -maxdepth 1 -name "icedtea*.patch" -exec cp {} ${S}/patches \;
   find ${WORKDIR} -maxdepth 1 -name "cacao*.patch" -exec cp {} ${S}/patches \;
 
-  # use now the rt.jar from icedtea6-native
+  # use now the rt.jar from icedtea7-native
   mkdir -p ${WORKDIR}/fake-jdk/jre/lib
-  ln -sf ${STAGING_LIBDIR_JVM_NATIVE}/icedtea6-native/jre/lib/rt.jar ${WORKDIR}/fake-jdk/jre/lib/rt.jar
+  ln -sf ${STAGING_LIBDIR_JVM_NATIVE}/icedtea7-native/jre/lib/rt.jar ${WORKDIR}/fake-jdk/jre/lib/rt.jar
 
   symlinked=false
   bbnote "Creating symlinks for fake-jdk"
   mkdir -p ${WORKDIR}/fake-jdk/include
-  for i in `find ${STAGING_LIBDIR_JVM_NATIVE}/icedtea6-native/include` ;do
+  for i in `find ${STAGING_LIBDIR_JVM_NATIVE}/icedtea7-native/include` ;do
 	bn=`basename $i`
 	echo "Symlinking: $bn"
     ln -sf $i ${WORKDIR}/fake-jdk/include/$bn;
@@ -183,7 +183,7 @@ do_configure_prepend() {
   done
 
   # If the symlinks have not been created the built cannot continue. This
-  # can happen if icedtea6-native is not ready at this point. The recipe
+  # can happen if icedtea7-native is not ready at this point. The recipe
   # should make sure this is not the case but a little sanity checking
   # in such a complicated build can't be wrong.
   if [ x$symlinked = xfalse ]
@@ -197,8 +197,8 @@ do_configure_prepend() {
 # Note: The following lines only work for OE.dev branch but cause an exception
 # in oe stable's 2009 bitbake. As such the function is prepended to do_configure instead.
 #addtask prepareconfigure after do_patch before do_configure
-# Makes prepareconfigure depend on icedtea6-native having being staged.
-#do_prepareconfigure[depends] += "icedtea6-native:do_populate_sysroot"
+# Makes prepareconfigure depend on icedtea7-native having being staged.
+#do_prepareconfigure[depends] += "icedtea7-native:do_populate_sysroot"
 
 
 do_configure_append() {
@@ -257,7 +257,7 @@ do_compilestepone() {
 
         # now we need to override the tools.jar to point to the normal jdk's tools.jar
         rm bootstrap/ecj/lib/tools.jar
-        ln -s ${STAGING_LIBDIR_JVM_NATIVE}/icedtea6-native/lib/tools.jar bootstrap/ecj/lib/tools.jar
+        ln -s ${STAGING_LIBDIR_JVM_NATIVE}/icedtea7-native/lib/tools.jar bootstrap/ecj/lib/tools.jar
 
         # First build hotspot to get a libjvm.so (to link corba in the icedtea-ecj build)
         bbnote "1/3 Building Hotspot"
@@ -287,7 +287,7 @@ do_compilesteptwo() {
 	ln -sf ../${BUILD_DIR_ECJ}/j2sdk-image bootstrap/icedtea
 
 	#	Replace all executables with symlinks to their native equivalents.
-	for F in `find ${STAGING_LIBDIR_JVM_NATIVE}/icedtea6-native/bin -type f`
+	for F in `find ${STAGING_LIBDIR_JVM_NATIVE}/icedtea7-native/bin -type f`
 	do
 		bf=`basename $F`
 		bbnote "Creating symlink for:" $bf

@@ -9,7 +9,7 @@ DEPENDS += "binutils"
 
 EXTRA_OECONF += "\
         --with-jdk-home=${WORKDIR}/fake-jdk \
-	--with-jar=${STAGING_LIBDIR_JVM_NATIVE}/icedtea6-native/bin/jar \
+	--with-jar=${STAGING_LIBDIR_JVM_NATIVE}/icedtea7-native/bin/jar \
 	--with-jaxws-drop-zip=${DL_DIR}/${JAXWS_FILE} \
 	--with-jaf-drop-zip=${DL_DIR}/${JAF_FILE} \
 	--with-jaxp-drop-zip=${DL_DIR}/${JAXP_FILE} \
