@@ -4,8 +4,7 @@ LICENSE  = "GPL with Classpath Exception"
 INC_PR = "r0"
 
 DEPENDS = "virtual/javac-native virtual/java-native classpath-native \
-           xalan-j-native xerces-j-native rhino-native \
-           ant-native \
+           rhino-native ant-native \
            libx11-native xproto-native libxt-native libxext-native libxrender-native \
            giflib-native jpeg-native libpng-native \
            glib-2.0-native freetype-native zlib-native \
