@@ -40,30 +40,29 @@ export ALT_FREETYPE_LIB_PATH = "${STAGING_LIBDIR}"
 def set_jdk7_native_jobs(d):
         import bb
 
-	pm  = bb.data.getVar('PARALLEL_MAKE', d, 1)
+        pm  = bb.data.getVar('PARALLEL_MAKE', d, 1)
         pmi = bb.data.getVar('PARALLEL_MAKE_ICEDTEA', d, 1)
 
-	if not pmi:
-		pm = pm.split("j");
-		if (len(pm) == 2):
-			bb.data.setVar('PARALLEL_MAKE_ICEDTEA', pm[1], d)
-	return
-
+        if not pmi:
+                pm = pm.split("j");
+                if (len(pm) == 2):
+                    bb.data.setVar('PARALLEL_MAKE_ICEDTEA', pm[1], d)
+        return
 
 PARALLEL = "${@set_jdk7_native_jobs(d)}"
 
 def get_jdk7_native_jobs(d):
-	import bb
+        import bb
 
-	ret = 1
-	pmoo = bb.data.getVar('PARALLEL_MAKE', d, 1)
-	if pmoo:
-		bb.data.setVar('PARALLEL_MAKE', "", d)
+        ret = 1
+        pmoo = bb.data.getVar('PARALLEL_MAKE', d, 1)
+        if pmoo:
+               bb.data.setVar('PARALLEL_MAKE', "", d)
 
-	pm = bb.data.getVar('PARALLEL_MAKE_ICEDTEA', d, 1)
-	if pm:
-		ret = pm
-	return ret
+        pm = bb.data.getVar('PARALLEL_MAKE_ICEDTEA', d, 1)
+        if pm:
+              ret = pm
+        return ret
 
 JDK_JOBS = "${@get_jdk7_native_jobs(d)}"
 
