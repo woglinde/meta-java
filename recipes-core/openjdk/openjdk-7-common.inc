@@ -10,7 +10,7 @@ ICEDTEA = "NEEDS TO BE SET"
 S = "${WORKDIR}/${ICEDTEA}"
 B = "${S}/build"
 
-INC_PR = "r1"
+INC_PR = "r2"
 
 SRC_URI = " \
   ${ICEDTEA_URI} \
@@ -55,7 +55,7 @@ DEPENDS_arm = " \
            freetype alsa-lib libffi \
           "
 
-DEPENDS_append_libc-uclibc = " libiconv "
+DEPENDS_append_libc-uclibc = " virtual/libiconv "
 
 # The OpenJDK build with interpreter optimizations for ARM depends on a binary
 # that generates constants for an assembler source file. There is no other
