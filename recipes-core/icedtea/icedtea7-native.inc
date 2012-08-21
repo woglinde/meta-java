@@ -1,6 +1,6 @@
 DESCRIPTION = "Harness to build the source code from OpenJDK using Free Software build tools"
 HOMEPAGE = "http://icedtea.classpath.org"
-LICENSE  = "GPL with Classpath Exception"
+LICENSE  = "GPL-2.0-with-classpath-exception"
 INC_PR = "r0"
 
 DEPENDS = "virtual/javac-native virtual/java-native classpath-native \
@@ -8,10 +8,12 @@ DEPENDS = "virtual/javac-native virtual/java-native classpath-native \
            libx11-native xproto-native libxt-native libxext-native libxrender-native \
            giflib-native jpeg-native libpng-native \
            glib-2.0-native freetype-native zlib-native \
-           fontconfig-native zip-native \
+           fontconfig-native zip-native alsa-lib-native \
           "
 
 inherit native java autotools
+
+JAVA_HOME[unexport] = "1"
 
 SRC_URI = " \
   ${ICEDTEA_URI} \
@@ -36,33 +38,21 @@ export ALT_FREETYPE_LIB_PATH = "${STAGING_LIBDIR}"
 # OpenJDK supports parallel compilation but uses a plain number for this.
 # In OE we have PARALLEL_MAKE which is the actual option passed to make,
 # e.g. "-j 4".
-
-def set_jdk7_native_jobs(d):
-        import bb
-
-        pm  = bb.data.getVar('PARALLEL_MAKE', d, 1)
-        pmi = bb.data.getVar('PARALLEL_MAKE_ICEDTEA', d, 1)
-
-        if not pmi:
-                pm = pm.split("j");
-                if (len(pm) == 2):
-                    bb.data.setVar('PARALLEL_MAKE_ICEDTEA', pm[1], d)
-        return
-
-PARALLEL = "${@set_jdk7_native_jobs(d)}"
-
+ICEDTEA_PARALLEL_MAKE := "${PARALLEL_MAKE}"
+PARALLEL_MAKE = ""
 def get_jdk7_native_jobs(d):
-        import bb
+    import bb
 
-        ret = 1
-        pmoo = bb.data.getVar('PARALLEL_MAKE', d, 1)
-        if pmoo:
-               bb.data.setVar('PARALLEL_MAKE', "", d)
+    pm = bb.data.getVar('ICEDTEA_PARALLEL_MAKE', d, 1);
+    if not pm:
+        return "1"
 
-        pm = bb.data.getVar('PARALLEL_MAKE_ICEDTEA', d, 1)
-        if pm:
-              ret = pm
-        return ret
+    pm = pm.split("j");
+    if (len(pm) == 2):
+        return pm[1].strip()
+
+    # Whatever found in PARALLEL_MAKE was not suitable.
+    return "1"
 
 JDK_JOBS = "${@get_jdk7_native_jobs(d)}"
 
@@ -97,10 +87,10 @@ JDK_DIR = "icedtea7-native"
 JDK_INSTALL_DIR = "${D}/${libdir_jvm}/${JDK_DIR}"
 
 do_configure_prepend() {
-        echo "Configure with parallel-jobs: ${PARALLEL}"
+        echo "Configure with parallel-jobs: ${JDK_JOBS}"
 
-        case "${TARGET_ARCH}" in
-                x86_64)
+        case "${TRANSLATED_TARGET_ARCH}" in
+                x86-64)
                         libarch=amd64
                 ;;
                 i386|i486|i586|i686)
@@ -160,7 +150,7 @@ do_configure_append() {
 }
 
 EXTRA_OEMAKE = ' \
-		OE_CFLAGS="${CFLAGS}" \
+                OE_CFLAGS="${CFLAGS}" \
                 OE_CPPFLAGS="${CPPFLAGS}" \
                 OE_CXXFLAGS="${CXXFLAGS}" \
                 OE_LDFLAGS="${LDFLAGS}" \
@@ -170,8 +160,8 @@ EXTRA_OEMAKE = ' \
 do_compile() {
 	# OpenJDK uses slightly different names for certain arches. We need to know
 	#	this to create some files which are expected by the build.
-	case "${TARGET_ARCH}" in
-		x86_64)
+	case "${TRANSLATED_TARGET_ARCH}" in
+		x86-64)
 			arch=amd64
 			libarch=amd64
 		;;
@@ -213,18 +203,18 @@ do_compile() {
 def jdk_arch(d):
         import bb
 
-        target_arch = bb.data.getVar('TARGET_ARCH', d, 1)
+        target_arch = bb.data.getVar('TRANSLATED_TARGET_ARCH', d, 1)
 
         if target_arch in ['i386', 'i486', 'i586', 'i686']:
             return "x86"
-        elif target_arch in ['x86_64']:
+        elif target_arch in ['x86-64']:
             return "amd64"
 
         return target_arch
 
 do_install() {
-	case "${TARGET_ARCH}" in
-		x86_64)
+	case "${TRANSLATED_TARGET_ARCH}" in
+		x86-64)
 			JDK_ARCH=amd64
 		;;
 		i386|i486|i586|i686)
