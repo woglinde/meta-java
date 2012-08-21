@@ -1,6 +1,6 @@
 DESCRIPTION = "Java runtime based upon the OpenJDK- and Icedtea Project"
 HOMEPAGE = "http://icedtea.classpath.org"
-LICENSE  = "GPL with Classpath Exception"
+LICENSE  = "GPL-2.0-with-classpath-exception"
 PRIORITY = "optional"
 SECTION  = "libs"
 
@@ -89,41 +89,30 @@ export CACAO_CONFIGURE_ARGS = " \
 
 JAVA_HOME[unexport] = "1"
 
-WITH_ADDITIONAL_VMS = "shark,cacao,jamvm"
+WITH_ADDITIONAL_VMS ?= "--with-additional-vms=shark,cacao,jamvm"
 
-WITH_ADDITIONAL_VMS_arm = "cacao,jamvm"
+WITH_ADDITIONAL_VMS_arm = "--with-additional-vms=cacao,jamvm"
 
 # OpenJDK supports parallel compilation but uses a plain number for this.
 # In OE we have PARALLEL_MAKE which is the actual option passed to make,
 # e.g. "-j 4".
 
-def set_jdk7_jobs(d):
-        import bb
-
-        pm  = bb.data.getVar('PARALLEL_MAKE', d, 1)
-        pmi = bb.data.getVar('PARALLEL_MAKE_ICEDTEA', d, 1)
-
-        if not pmi:
-                pm = pm.split("j");
-                if (len(pm) == 2):
-                        bb.data.setVar('PARALLEL_MAKE_ICEDTEA', pm[1], d)
-        return
-
-
-PARALLEL = "${@set_jdk7_jobs(d)}"
+OPENJDK_PARALLEL_MAKE := "${PARALLEL_MAKE}"
+PARALLEL_MAKE =  ""
 
 def get_jdk7_jobs(d):
-        import bb
+    import bb
 
-        ret = 1
-        pmoo = bb.data.getVar('PARALLEL_MAKE', d, 1)
-        if pmoo:
-                bb.data.setVar('PARALLEL_MAKE', "", d)
+    pm = bb.data.getVar('OPENJDK_PARALLEL_MAKE', d, 1);
+    if not pm:
+        return "1"
 
-        pm = bb.data.getVar('PARALLEL_MAKE_ICEDTEA', d, 1)
-        if pm:
-                ret = pm
-        return ret
+    pm = pm.split("j");
+    if (len(pm) == 2):
+        return pm[1].strip()
+
+    # Whatever found in PARALLEL_MAKE was not suitable.
+    return "1"
 
 JDK_JOBS = "${@get_jdk7_jobs(d)}"
 
@@ -157,21 +146,24 @@ EXTRA_OECONF = " \
 	\
 	--with-pkgversion=${PV} \
 	--with-cc-for-build=${BUILD_CC} \
-        --with-additional-vms=${WITH_ADDITIONAL_VMS} \
        "
 
 # OpenJDK uses slightly different names for certain arches. We need to know
 #	this to create some files which are expected by the build.
 def get_jdk_arch(d):
-  import bb
+    import bb
 
-  jdk_arch = bb.data.getVar('TARGET_ARCH', d, 1)
-  if jdk_arch == "x86_64":
-    jdk_arch = "amd64"
-  elif (jdk_arch == "i486" or jdk_arch == "i586" or jdk_arch == "i686"):
-    jdk_arch = "i386"
+    jdk_arch = bb.data.getVar('TRANSLATED_TARGET_ARCH', d, 1)
+    if jdk_arch == "x86-64":
+        jdk_arch = "amd64"
+    elif jdk_arch == "powerpc":
+        jdk_arch = "ppc"
+    elif jdk_arch == "powerpc64":
+        jdk_arch = "ppc64"
+    elif (jdk_arch == "i486" or jdk_arch == "i586" or jdk_arch == "i686"):
+        jdk_arch = "i386"
 
-  return jdk_arch
+    return jdk_arch
 
 JDK_ARCH = "${@get_jdk_arch(d)}"
 JDK_HOME = "${libdir_jvm}/${JDK_DIR}"
@@ -179,24 +171,24 @@ JDK_FAKE = "${WORKDIR}/fake-jdk"
 
 # A function that is needed in the Shark builds.
 def get_llvm_configure_arch(d):
-  import bb;
+    import bb;
 
-  arch = bb.data.getVar('TARGET_ARCH', d, 1)
-  if arch == "x86_64" or arch == "i486" or arch == "i586" or arch == "i686":
-    arch = "x86"
-  elif arch == "arm":
-    arch = "arm"
-  elif arch == "mipsel" or arch == "mips":
-    arch = "mips"
-  elif arch == "powerpc":
-    arch = "powerpc"
-  else:
-    bb.error("%s does not support %s yet" % (bb.data.getVar('PN', d, 1), arch) );
+    arch = bb.data.getVar('TRANSLATED_TARGET_ARCH', d, 1)
+    if arch == "x86-64" or arch == "i486" or arch == "i586" or arch == "i686":
+        arch = "x86"
+    elif arch == "arm":
+        arch = "arm"
+    elif arch == "mipsel" or arch == "mips":
+        arch = "mips"
+    elif arch == "powerpc" or arch == "powerpc64":
+        arch = "powerpc"
+    else:
+        bb.error("%s does not support %s yet" % (bb.data.getVar('PN', d, 1), arch) );
 
-  return arch
+    return arch
 
 do_configure_prepend() {
-  echo "Configure with parallel-jobs: ${PARALLEL}"
+  echo "Configure with parallel-jobs: ${JDK_JOBS}"
 
   # Automatically copy everything that starts with "icedtea" (or "cacao") and ends with
   # ".patch" into the patches directory.
@@ -224,6 +216,7 @@ EXTRA_OEMAKE += ' \
                 OE_LDFLAGS="${TARGET_LDFLAGS}" \
                 ZIPEXE="${STAGING_BINDIR_NATIVE}/zip" \
 		CROSS_COMPILE_ARCH="${JDK_ARCH}" \
+		REQUIRED_ALSA_VERSION="" \
                '
 
 # Puts an OE specific string into the binary making it possible for the user
@@ -247,7 +240,7 @@ OE_LAUNCHER_LDFLAGS_arm = ""
 EXTRA_OEMAKE += 'OE_LAUNCHER_LDFLAGS="${OE_LAUNCHER_LDFLAGS}"'
 
 # Large stack is required at least on x86_64 host, otherwise random segfaults appear:
-QEMU = "${@qemu_target_binary(d)} ${QEMU_OPTIONS} -s 2097152 -L ${STAGING_DIR_TARGET}"
+QEMU = "${@qemu_target_binary(d)} ${QEMU_OPTIONS} -s 2097152 -L ${STAGING_DIR_TARGET} -E LD_LIBRARY_PATH=${STAGING_BASELIBDIR}"
 
 EXTRA_OEMAKE += 'QEMU="${QEMU}"'
 
@@ -295,6 +288,7 @@ do_install() {
 # 3) All other packages, including -jdk, are optional and not needed for normal Java apps.
 PACKAGES = " \
             ${JDKPN}-jre \
+	    ${JDKPN}-jre-dbg \
             ${JDKPN}-dbg \
             ${JDKPN}-demo-dbg \
             ${JDKPN}-demo \
@@ -352,6 +346,10 @@ FILES_${JDKPN}-vm-jamvm = "${JDK_HOME}/jre/lib/${JDK_ARCH}/jamvm/"
 FILES_${JDKPN}-common = "${JDK_HOME}/jre/ASSEMBLY_EXCEPTION \
                           ${JDK_HOME}/jre/THIRD_PARTY_README \
                           ${JDK_HOME}/jre/LICENSE \
+                          ${JDK_HOME}/ASSEMBLY_EXCEPTION \
+                          ${JDK_HOME}/THIRD_PARTY_README \
+                          ${JDK_HOME}/LICENSE \
+                          ${JDK_HOME}/release \
                           ${JDK_HOME}/jre/lib \
                          "
 
