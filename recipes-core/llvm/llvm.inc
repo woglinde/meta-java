@@ -65,8 +65,6 @@ EXTRA_OECMAKE = "\
 # We need to reset this to avoid breakage as we build out of tree
 TOOLCHAIN_OPTIONS = ""
 
-PACKAGES = "${PN}-dbg ${PN}-doc ${PN}-dev ${PN}"
-
 PACKAGES_DYNAMIC = "llvm-*"
 
 # the difference to the non-native build is that we do not need
@@ -204,7 +202,7 @@ def get_llvm_arch(d):
         arch = "ARM"
     elif arch == "mipsel" or arch == "mips":
         arch = "mips"
-    elif arch == "powerpc":
+    elif arch == "powerpc" or arch == "powerpc64":
         arch = "PowerPC"
     else:
         bb.error("%s does not support %s yet" % (bb.data.getVar('PN', d, 1), arch) );

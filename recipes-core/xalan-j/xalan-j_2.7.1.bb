@@ -1,5 +1,5 @@
 DESCRIPTION = "Java XSLT processor"
-LICENSE = "AL2.0"
+LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = " \
                     file://${WORKDIR}/bsf-2.4.0/LICENSE.txt;md5=b1e01b26bacfc2232046c90a330332b3 \
                     file://${WORKDIR}/xalan-j_2_7_1/LICENSE.txt;md5=f4411652c74c374bb2564394185289ee \
@@ -7,11 +7,12 @@ LIC_FILES_CHKSUM = " \
 AUTHOR = "Apache Software Foundation"
 HOMEPAGE = "http://xml.apache.org/xalan-j"
 
+PR = "r1"
+
 DEPENDS = "xerces-j regexp jlex cup jaxp1.3 bcel"
 DEPENDS_virtclass-native = " \
 	xerces-j-native regexp-native jlex-native cup-native jaxp1.3-native bcel-native \
 	"
-
 
 SRC_URI = "\
 	http://archive.apache.org/dist/xml/${BPN}/${BPN}_2_7_1-src.tar.gz;name=archive \
@@ -39,6 +40,7 @@ do_compile() {
   # Remove BSF classes
   rm -rf build-xalan/org/apache/bsf
 
+  rm -rf build-serializer/
   mkdir -p build-serializer/org/apache/xml
   mv build/org/apache/xml/serializer build-serializer/org/apache/xml
 

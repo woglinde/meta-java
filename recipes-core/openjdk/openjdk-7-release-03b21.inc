@@ -93,7 +93,14 @@ ICEDTEAPATCHES = "\
 	file://icedtea-corba-parallel-make.patch;apply=no \
         file://icedtea-zero-hotspotfix.patch;apply=no \
 	"
-
+ICEDTEAPATCHES_append_powerpc = " \
+	file://icedtea-jdk-nio-use-host-cc.patch;apply=no \
+	file://icedtea-jdk-ppc64-jvm-cfg.patch;apply=no \
+        "
+ICEDTEAPATCHES_append_powerpc64 = " \
+	file://icedtea-jdk-nio-use-host-cc.patch;apply=no \
+	file://icedtea-jdk-ppc64-jvm-cfg.patch;apply=no \
+        "
 ICEDTEAPATCHES_append_libc-uclibc = " \
         file://icedtea-hotspot-isfinte.patch;apply=no \
         file://icedtea-hotspot-glibc-version.patch;apply=no \
@@ -129,4 +136,12 @@ DISTRIBUTION_PATCHES_append_libc-uclibc = "\
 	patches/icedtea-hotspot-dlvsym-uclibc.patch \
         "
 
+DISTRIBUTION_PATCHES_append_powerpc = " \
+	patches/icedtea-jdk-nio-use-host-cc.patch \
+	patches/icedtea-jdk-ppc64-jvm-cfg.patch \
+        "
+DISTRIBUTION_PATCHES_append_powerpc64 = " \
+	patches/icedtea-jdk-nio-use-host-cc.patch \
+	patches/icedtea-jdk-ppc64-jvm-cfg.patch \
+        "
 export DISTRIBUTION_PATCHES

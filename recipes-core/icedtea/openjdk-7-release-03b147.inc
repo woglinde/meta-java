@@ -18,11 +18,11 @@ OPENJDK_URI = "${ICEDTEA_HG_URL}/archive/${OPENJDK_FILE};name=openjdk;unpack=fal
 SRC_URI[openjdk.md5sum] = "f98b0f7a69f9427a5b3775dddddc89cb"
 SRC_URI[openjdk.sha256sum] = "758227833982371e3a94def84226a947f8dbbd176517f313b8cb96840bdea41e"
 
-HOTSPOT_CHANGESET = "0e651e004747"
+HOTSPOT_CHANGESET = "8b7c4c5f6ba9"
 HOTSPOT_FILE = "${HOTSPOT_CHANGESET}.tar.gz"
 HOTSPOT_URI = "${ICEDTEA_HG_URL}/hotspot/archive/${HOTSPOT_FILE};name=hotspot;unpack=false"
-SRC_URI[hotspot.md5sum] = "edd627c8781161eb33006ed668d833e0"
-SRC_URI[hotspot.sha256sum] = "d68455e5cdb14280cd61155a4e9d531e90b073607f4367e93ead0fcf34476ae1"
+SRC_URI[hotspot.md5sum] = "cb45a8f19d77acc1f4f48e75e36a27fe"
+SRC_URI[hotspot.sha256sum] = "22866990d143e76ced94b76defa3051e5e5d9a51fd272d63daa0df272d6406a2"
 
 CORBA_CHANGESET = "5617f6c5cc94"
 CORBA_FILE = "${CORBA_CHANGESET}.tar.gz"
@@ -30,11 +30,11 @@ CORBA_URI = "${ICEDTEA_HG_URL}/corba/archive/${CORBA_FILE};name=corba;unpack=fal
 SRC_URI[corba.md5sum] = "920f1a788a7fdef29a5cd70892331251"
 SRC_URI[corba.sha256sum] = "963915483530f311ff313635f79ed11ea7ce5a1c0dbee5d1acb1994132857fa3"
 
-JAXP_CHANGESET = "1cf75c0e2c96"
+JAXP_CHANGESET = "7a8825b15df6"
 JAXP_FILE = "${JAXP_CHANGESET}.tar.gz"
 JAXP_URI = "${ICEDTEA_HG_URL}/jaxp/archive/${JAXP_FILE};name=jaxp;unpack=false"
-SRC_URI[jaxp.md5sum] = "56e609548b322149cb84604f232a4602"
-SRC_URI[jaxp.sha256sum] = "8ce48c704f38285207ee6dc56c45b2d214083b4d4d36be02901401b594ce701e"
+SRC_URI[jaxp.md5sum] = "a0982b6df79739127871e355a40ca5a6"
+SRC_URI[jaxp.sha256sum] = "297c8dbeed5afa5395b6be06b17282d53f8a888c2909074dfc1605afc0daf1c2"
 
 JAXWS_CHANGESET = "7edfbfe974f2"
 JAXWS_FILE = "${JAXWS_CHANGESET}.tar.gz"
@@ -42,11 +42,11 @@ JAXWS_URI = "${ICEDTEA_HG_URL}/jaxws/archive/${JAXWS_FILE};name=jaxws;unpack=fal
 SRC_URI[jaxws.md5sum] = "2deecec809ea8e38835678889c2bc3ac"
 SRC_URI[jaxws.sha256sum] = "823ca6b8fd780bf1b1565a90cfc8ec6f0ee422a5d25ffb20b1ce0272dc4955aa"
 
-JDK_CHANGESET = "50f6f276a06c"
+JDK_CHANGESET = "d5ddeffc4651"
 JDK_FILE = "${JDK_CHANGESET}.tar.gz"
 JDK_URI = "${ICEDTEA_HG_URL}/jdk/archive/${JDK_FILE};name=jdk;unpack=false"
-SRC_URI[jdk.md5sum] = "7ee77eeeff600c5a4763b4ac76fd62bc"
-SRC_URI[jdk.sha256sum] = "5f8b5edbebb358730425e64a31eaa11c346467ba10ffe1848f2d2ad2ea53bc3d"
+SRC_URI[jdk.md5sum] = "27c28d6be213df818490e69f12efe475"
+SRC_URI[jdk.sha256sum] = "e83e6234842376147a4c32451f23d629ba107e908ebdb0f367657f9cc6c1be98"
 
 LANGTOOLS_CHANGESET = "b534c4c6cd9b"
 LANGTOOLS_FILE = "${LANGTOOLS_CHANGESET}.tar.gz"
@@ -81,7 +81,6 @@ OPENJDK_PATCHES = " \
         file://icedtea-hotspot-make-arch-sane-for-x86.patch;apply=no \
         file://icedtea-jdk-sane-x86-arch.patch;apply=no \
 	file://icedtea-flags.patch;apply=no \
-        file://icedtea-remove_sparc_compiler_option.patch;apply=no \
         "
 
 #	file://icedtea-disable-desktop-dirs.patch;apply=no \
@@ -94,7 +93,6 @@ export DISTRIBUTION_PATCHES = " \
         patches/icedtea-hotspot-make-arch-sane-for-x86.patch \
         patches/icedtea-jdk-sane-x86-arch.patch \
 	patches/icedtea-flags.patch \
-        patches/icedtea-remove_sparc_compiler_option.patch \
         "
 
 #	patches/icedtea-disable-desktop-dirs.patch \
