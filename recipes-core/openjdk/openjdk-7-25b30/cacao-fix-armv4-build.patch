@@ -1,0 +1,61 @@
+diff -r 1a8f05fd52b6 -r b57c0363782f configure.ac
+--- cacao/cacao/configure.ac	Sun Jun 16 23:26:08 2013 +0200
++++ cacao/cacao/configure.ac	Fri Jun 21 15:22:06 2013 +0200
+@@ -54,6 +54,14 @@
+ 		ARCH_FLAGS="$ARCH_FLAGS -D__ARMHF__"
+ 		;;
+ 	esac
++
++	case "$host_cpu" in
++	armv5* | armv6* | armv7* )
++		;;
++	*)
++		AC_DEFINE(ARM_NO_THUMB_IW, 1, [Old ARM architecture without good Thumb interworking])
++		;;
++	esac
+     ;;
+ 
+ hppa2.0 )
+diff -r 1a8f05fd52b6 -r b57c0363782f src/vm/jit/arm/asmpart.S
+--- cacao/cacao/src/vm/jit/arm/asmpart.S	Sun Jun 16 23:26:08 2013 +0200
++++ cacao/cacao/src/vm/jit/arm/asmpart.S	Fri Jun 21 15:22:06 2013 +0200
+@@ -239,7 +239,11 @@
+ 	stmfd sp!, {lr}                     /* save return address                */
+ 	add   a0, sp, #(1*4)                /* pass java sp                       */
+ 	mov   a1, lr                        /* pass exception address             */
++#if defined(ARM_NO_THUMB_IW)
++	bl    exceptions_asm_new_abstractmethoderror
++#else
+ 	blx   exceptions_asm_new_abstractmethoderror
++#endif
+ 	ldmfd sp!, {lr}                     /* restore return address             */
+ 
+ 	mov   xptr, res1                    /* get exception pointer              */
+@@ -281,7 +285,11 @@
+ 	swi   __ARM_NR_cacheflush
+ #endif
+ 
++#if defined(ARM_NO_THUMB_IW)
++	mov   pc, lr
++#else
+ 	bx    lr
++#endif
+ 
+ 
+ /* disable exec-stacks ********************************************************/
+diff -r 1a8f05fd52b6 -r b57c0363782f src/vm/jit/arm/codegen.c
+--- cacao/cacao/src/vm/jit/arm/codegen.c	Sun Jun 16 23:26:08 2013 +0200
++++ cacao/cacao/src/vm/jit/arm/codegen.c	Fri Jun 21 15:22:06 2013 +0200
+@@ -1734,7 +1734,12 @@
+ 
+ 			/* generate the actual call */
+ 
++#if defined(ARM_NO_THUMB_IW)
++			M_MOV(REG_LR, REG_PC);
++			M_MOV(REG_PC, REG_PV);
++#else
+ 			M_BLX(REG_PV);
++#endif
+ 
+ 			break;
+ 
