@@ -57,7 +57,7 @@ FILES_libcgi-jni = "${libdir_jni}/libcgi-java.so"
 FILES_libcgi-jni-dbg = "${libdir_jni}/.debug/libcgi-java.so"
 RDEPENDS_libcgi-java = "libcgi-jni"
 
-FILES_libunixsocket-java = "${datadir_java}/unix*.jar"
+FILES_libunixsocket-java = "${datadir_java}/unix*.jar ${datadir_java}/libmatthew.jar"
 FILES_libunixsocket-jni = "${libdir_jni}/libunix-java.so"
 FILES_libunixsocket-jni-dbg = "${libdir_jni}/.debug/libunix-java.so"
 RDEPENDS_libunixsocket-java = "libunixsocket-jni"
