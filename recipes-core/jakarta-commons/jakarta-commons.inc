@@ -1,7 +1,7 @@
 AUTHOR = "Apache Software Foundation"
 LICENSE = "Apache-2.0"
 
-INC_PR = "r0"
+INC_PR = "r1"
 
 inherit java-library
 
