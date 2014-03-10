@@ -1,9 +1,9 @@
 require classpath-native.inc
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=af0004801732bc4b20d90f351cf80510"
-DEPENDS += "ecj-initial virtual/java-initial"
+DEPENDS += "ecj-initial"
 
-PR = "${INC_PR}.1"
+PR = "${INC_PR}.0"
 
 SRC_URI += " \
             file://sun-security-getproperty.patch;striplevel=0 \
