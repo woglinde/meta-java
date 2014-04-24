@@ -78,14 +78,15 @@ ICEDTEAPATCHES = "\
 	file://icedtea-shark-arm-linux-cpu-detection.patch;apply=no \
 	file://icedtea-corba-parallel-make.patch;apply=no \
         file://icedtea-zero-hotspotfix.patch;apply=no \
-	file://icedtea-jdk-nio-use-host-cc.patch;apply=no \
         file://icedtea-unset-NIO_PLATFORM_CLASSES_ROOT_DIR.patch;apply=no \
 	"
 ICEDTEAPATCHES_append_powerpc = " \
+	file://icedtea-jdk-nio-use-host-cc.patch;apply=no \
 	file://icedtea-jdk-ppc64-jvm-cfg.patch;apply=no \
 	file://icedtea-jdk-powerpc-atomic64.patch;apply=no \
         "
 ICEDTEAPATCHES_append_powerpc64 = " \
+	file://icedtea-jdk-nio-use-host-cc.patch;apply=no \
 	file://icedtea-jdk-ppc64-jvm-cfg.patch;apply=no \
         "
 ICEDTEAPATCHES_append_libc-uclibc = " \
@@ -108,7 +109,6 @@ DISTRIBUTION_PATCHES = "\
 	patches/icedtea-shark-arm-linux-cpu-detection.patch \
 	patches/icedtea-corba-parallel-make.patch \
         patches/icedtea-zero-hotspotfix.patch \
-	patches/icedtea-jdk-nio-use-host-cc.patch \
 	patches/icedtea-unset-NIO_PLATFORM_CLASSES_ROOT_DIR.patch \
 	"
 
@@ -124,10 +124,12 @@ DISTRIBUTION_PATCHES_append_libc-uclibc = "\
         "
 
 DISTRIBUTION_PATCHES_append_powerpc = " \
+	patches/icedtea-jdk-nio-use-host-cc.patch \
 	patches/icedtea-jdk-ppc64-jvm-cfg.patch \
 	patches/icedtea-jdk-powerpc-atomic64.patch \
         "
 DISTRIBUTION_PATCHES_append_powerpc64 = " \
+	patches/icedtea-jdk-nio-use-host-cc.patch \
 	patches/icedtea-jdk-ppc64-jvm-cfg.patch \
         "
 export DISTRIBUTION_PATCHES
