@@ -1,0 +1,19 @@
+--- openjdk/corba/make/common/shared/Platform.gmk	2014-01-21 13:46:58.000000000 +0100
++++ openjdk/corba/make/common/shared/Platform.gmk	2014-05-06 08:51:53.128748151 +0200
+@@ -152,9 +152,13 @@
+   OS_NAME = linux
+   OS_VERSION := $(shell uname -r)
+   # Arch and OS name/version
+-  mach := $(shell uname -m)
+-  ifneq (,$(wildcard /usr/bin/dpkg-architecture))
+-    mach := $(shell (dpkg-architecture -qDEB_HOST_ARCH_CPU 2>/dev/null || echo $(mach)) | sed 's/arm64/aarch64/;s/powerpc$$/ppc/;s/hppa/parisc/;s/ppc64el/ppc64le/')
++  ifdef CROSS_COMPILE_ARCH
++    mach := $(CROSS_COMPILE_ARCH)
++  else
++    mach := $(shell uname -m)
++    ifneq (,$(wildcard /usr/bin/dpkg-architecture))
++      mach := $(shell (dpkg-architecture -qDEB_HOST_ARCH_CPU 2>/dev/null || echo $(mach)) | sed 's/arm64/aarch64/;s/powerpc$$/ppc/;s/hppa/parisc/;s/ppc64el/ppc64le/')
++    endif
+   endif
+   archExpr = case "$(mach)" in \
+                 i[3-9]86) \

@@ -1,0 +1,70 @@
+--- openjdk/hotspot/make/linux/makefiles/build_vm_def.sh
++++ openjdk/hotspot/make/linux/makefiles/build_vm_def.sh
+@@ -1,10 +1,12 @@
+ #!/bin/sh
+ 
+ # If we're cross compiling use that path for nm
+-if [ "$CROSS_COMPILE_ARCH" != "" ]; then 
+-NM=$ALT_COMPILER_PATH/nm
+-else
+-NM=nm
++if [ "$NM" == "" ]; then
++  if [ "$CROSS_COMPILE_ARCH" != "" ]; then 
++    NM=$ALT_COMPILER_PATH/nm
++  else
++    NM=nm
++  fi
+ fi
+ 
+ $NM --defined-only $* \
+--- openjdk/hotspot/make/linux/makefiles/gcc.make
++++ openjdk/hotspot/make/linux/makefiles/gcc.make
+@@ -164,7 +164,7 @@ CFLAGS_WARN/DEFAULT = $(WARNINGS_ARE_ERRORS) $(ACCEPTABLE_WARNINGS)
+ CFLAGS_WARN/BYFILE = $(CFLAGS_WARN/$@)$(CFLAGS_WARN/DEFAULT$(CFLAGS_WARN/$@)) 
+ 
+ # The flags to use for an Optimized g++ build
+-OPT_CFLAGS += -O3
++OPT_CFLAGS += $(OE_CFLAGS)
+ 
+ # Hotspot uses very unstrict aliasing turn this optimization off
+ OPT_CFLAGS += -fno-strict-aliasing
+@@ -208,15 +208,7 @@ LFLAGS += -Wl,-relax
+ endif
+ 
+ # Enable linker optimization
+-LFLAGS += -Xlinker -O1
+-
+-# If this is a --hash-style=gnu system, use --hash-style=both
+-#   The gnu .hash section won't work on some Linux systems like SuSE 10.
+-_HAS_HASH_STYLE_GNU:=$(shell $(CC) -dumpspecs | grep -- '--hash-style=gnu')
+-ifneq ($(_HAS_HASH_STYLE_GNU),)
+-  LDFLAGS_HASH_STYLE = -Wl,--hash-style=both
+-endif
+-LFLAGS += $(LDFLAGS_HASH_STYLE)
++LFLAGS += $(OE_LDFLAGS)
+ 
+ # Use $(MAPFLAG:FILENAME=real_file_name) to specify a map file.
+ MAPFLAG = -Xlinker --version-script=FILENAME
+--- openjdk/hotspot/make/linux/makefiles/launcher.make
++++ openjdk/hotspot/make/linux/makefiles/launcher.make
+@@ -50,8 +50,8 @@ ifeq ($(LINK_INTO),AOUT)
+   LIBS_LAUNCHER             += $(STATIC_STDCXX) $(LIBS)
+ else
+   LAUNCHER.o                 = launcher.o
+-  LFLAGS_LAUNCHER           += -L `pwd`
+-  LIBS_LAUNCHER             += -l$(JVM) $(LIBS)
++  LFLAGS_LAUNCHER           += -L `pwd` $(OE_LAUNCHER_LDFLAGS) $(OE_LDFLAGS)
++  LIBS_LAUNCHER             += -l$(JVM) $(LIBS) -lstdc++
+ endif
+ 
+ LINK_LAUNCHER = $(LINK.CC)
+--- openjdk/hotspot/make/linux/makefiles/vm.make
++++ openjdk/hotspot/make/linux/makefiles/vm.make
+@@ -292,6 +292,7 @@
+   LFLAGS_VM += $(LLVM_LDFLAGS)
+ endif
+ 
++LFLAGS_VM += $(OE_LDFLAGS)
+ LINK_VM = $(LINK_LIB.CC)
+ 
+ # rule for building precompiled header

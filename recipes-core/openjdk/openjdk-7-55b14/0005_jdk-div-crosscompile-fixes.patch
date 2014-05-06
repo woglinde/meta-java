@@ -1,0 +1,255 @@
+--- openjdk/jdk/make/common/shared/Platform.gmk
++++ openjdk/jdk/make/common/shared/Platform.gmk
+@@ -159,9 +159,9 @@
+     mach := $(CROSS_COMPILE_ARCH)
+   else
+     mach := $(shell uname -m)
+-  endif
+-  ifneq (,$(wildcard /usr/bin/dpkg-architecture))
+-    mach := $(shell (dpkg-architecture -qDEB_HOST_ARCH_CPU 2>/dev/null || echo $(mach)) | sed 's/arm64/aarch64/;s/powerpc$$/ppc/;s/hppa/parisc/;s/ppc64el/ppc64le/')
++    ifneq (,$(wildcard /usr/bin/dpkg-architecture))
++      mach := $(shell (dpkg-architecture -qDEB_HOST_ARCH_CPU 2>/dev/null || echo $(mach)) | sed 's/arm64/aarch64/;s/powerpc$$/ppc/;s/hppa/parisc/;s/ppc64el/ppc64le/')
++    endif
+   endif
+   archExpr = case "$(mach)" in \
+                 i[3-9]86) \
+--- openjdk/jdk/make/java/nio/Makefile
++++ openjdk/jdk/make/java/nio/Makefile
+@@ -934,8 +934,12 @@ else
+ $(SCH_GEN)/SocketOptionRegistry.java: $(GENSOR_EXE)
+ 	$(prep-target)
+ 	NAWK="$(NAWK)" SH="$(SH)" $(SH) -e addNotices.sh "$(SOR_COPYRIGHT_YEARS)" > $@
++ifdef CROSS_COMPILE_ARCH
++	$(QEMU) $(GENSOR_EXE) >> $@
++else
+ 	$(GENSOR_EXE) >> $@
+ endif
++endif
+ #
+ # Generated sun.nio.cs SingleByte classes
+ #
+@@ -969,8 +973,12 @@ else
+ $(SFS_GEN)/UnixConstants.java: $(GENUC_EXE)
+ 	$(prep-target)
+ 	NAWK="$(NAWK)" SH="$(SH)" $(SH) -e addNotices.sh "$(GENUC_COPYRIGHT_YEARS)" > $@
++ifdef CROSS_COMPILE_ARCH
++	$(QEMU) $(GENUC_EXE) >> $@
++else
+ 	$(GENUC_EXE) >> $@
+ endif
++endif
+ 
+ GENSC_SRC = $(PLATFORM_SRC)/native/sun/nio/fs/genSolarisConstants.c
+ 
+@@ -991,7 +999,11 @@ else
+ $(SFS_GEN)/SolarisConstants.java: $(GENSC_EXE)
+ 	$(prep-target)
+ 	NAWK="$(NAWK)" SH="$(SH)" $(SH) -e addNotices.sh "$(GENSC_COPYRIGHT_YEARS)" > $@
++ifdef CROSS_COMPILE_ARCH
++	$(QEMU) $(GENSC_EXE) >> $@
++else
+ 	$(GENSC_EXE) >> $@
+ endif
++endif
+ 
+ .PHONY: sources 
+--- openjdk/jdk/make/sun/awt/mawt.gmk
++++ openjdk/jdk/make/sun/awt/mawt.gmk
+@@ -151,22 +151,6 @@ else
+ #endif
+ 
+ LIBXTST = -lXtst
+-ifeq ($(PLATFORM), linux)
+-   ifeq ($(ARCH_DATA_MODEL), 64)
+-   # XXX what about the rest of them?
+-        LIBXT = -lXt
+-    else
+-    # Allows for builds on Debian GNU Linux, X11 is in a different place 
+-       LIBXT = $(firstword $(wildcard $(OPENWIN_LIB)/libXt.a) \
+-                        $(wildcard /usr/lib/libXt.a))
+-       LIBSM = $(firstword $(wildcard $(OPENWIN_LIB)/libSM.a) \
+-                        $(wildcard /usr/lib/libSM.a))
+-       LIBICE = $(firstword $(wildcard $(OPENWIN_LIB)/libICE.a) \
+-                         $(wildcard /usr/lib/libICE.a))
+-       LIBXTST = $(firstword $(wildcard $(OPENWIN_LIB)/libXtst.a) \
+-                         $(wildcard /usr/lib/libXtst.a))
+-   endif
+-endif
+ 
+ # Use -lXmu for EditRes support
+ LIBXMU_DBG	= -lXmu
+@@ -181,7 +165,7 @@ ifneq (,$(findstring $(PLATFORM), linux macosx))
+ OTHER_CFLAGS += -DMLIB_NO_LIBSUNMATH
+ # XXX what is this define below? Isn't it motif-related?
+ OTHER_CFLAGS += -DXMSTRINGDEFINES=1
+-OTHER_LDLIBS =  $(LIBXMU) $(LIBXTST) -lXext $(LIBXT) $(LIBSM) $(LIBICE) -lX11 -lXi
++OTHER_LDLIBS =  $(LIBXMU) $(LIBXTST) -lXext -lXt -lSM -lICE -lXi -lX11
+ endif
+ 
+ endif
+@@ -230,12 +214,6 @@ else
+   CPPFLAGS += -I$(PLATFORM_SRC)/native/common/deps/fontconfig2
+ endif
+ 
+-ifndef HEADLESS
+-CPPFLAGS += -I$(OPENWIN_HOME)/include 
+-LDFLAGS  += -L$(OPENWIN_LIB)
+-
+-endif # !HEADLESS
+-
+ CPPFLAGS += -I$(SHARE_SRC)/native/$(PKGDIR)/debug \
+             -I$(SHARE_SRC)/native/$(PKGDIR)/../font \
+             -I$(PLATFORM_SRC)/native/$(PKGDIR)/../font \
+@@ -269,12 +247,6 @@ LDFLAGS  += -L$(MOTIF_LIB) -L$(OPENWIN_LIB)
+ endif # !HEADLESS
+ endif # PLATFORM
+ 
+-ifeq ($(PLATFORM), linux)
+-  # Checking for the X11/extensions headers at the additional location
+-  CPPFLAGS += -I$(firstword $(wildcard $(OPENWIN_HOME)/include/X11/extensions) \
+-                        $(wildcard /usr/include/X11/extensions))
+-endif
+-
+ ifeq ($(PLATFORM), macosx))
+   CPPFLAGS += -I$(OPENWIN_HOME)/include/X11/extensions \
+               -I$(OPENWIN_HOME)/include 
+--- openjdk/jdk/make/sun/xawt/Makefile
++++ openjdk/jdk/make/sun/xawt/Makefile
+@@ -198,20 +198,6 @@
+   CPPFLAGS += -I$(PLATFORM_SRC)/native/common/deps/glib2
+ endif
+ 
+-ifeq ($(PLATFORM), linux)
+-  ifndef CROSS_COMPILE_ARCH
+-    # Allows for builds on Debian GNU Linux, X11 is in a different place 
+-    # This should really be handled at a higher-level so we don't have to
+-    # work-around this when cross-compiling
+-    CPPFLAGS += -I/usr/X11R6/include/X11/extensions \
+-                -I/usr/include/X11/extensions \
+-                -I$(OPENWIN_HOME)/include 
+-  else
+-    CPPFLAGS += -I$(OPENWIN_HOME)/include/X11/extensions \
+-                -I$(OPENWIN_HOME)/include 
+-  endif
+-endif
+-
+ # We have some odd logic here because some Solaris 10 updates
+ # have a render.h file that suggests gradients are supported, but
+ # the Xrender.h doesn't have the corresponding type definitions.
+@@ -292,16 +278,10 @@
+ SIZERS = $(SIZER).32
+ SIZERS_C = $(SIZER_32_C)
+ SIZES = $(WRAPPER_GENERATOR_DIR)/sizes.32
+-ifdef CROSS_COMPILE_ARCH
+-CFLAGS_32 = -m32
+-endif
+ else # !32
+ SIZERS = $(SIZER).64
+ SIZERS_C = $(SIZER_64_C)
+ SIZES = $(WRAPPER_GENERATOR_DIR)/sizes.64
+-ifdef CROSS_COMPILE_ARCH
+-CFLAGS_64 = -m64
+-endif
+ endif # 32
+ endif # !macosx
+ endif # solaris
+@@ -337,15 +317,11 @@
+ WRAPPER_GENERATOR_CLASS=$(WRAPPER_GENERATOR_TEMPDIR)/WrapperGenerator.class 
+ XLIBTYPES=$(PLATFORM_SRC)/classes/sun/awt/X11/generator/xlibtypes.txt
+ 
+-ifndef CROSS_COMPILE_ARCH
+ SIZERS_CC = $(CC)
+-else
+-SIZERS_CC = $(HOST_CC)
+-endif
+ 
+ $(SIZERS): $(SIZERS_C) 
+ 	$(prep-target)
+-	$(SIZERS_CC) $(CFLAGS_$(subst .,,$(suffix $@))) $(CPPFLAGS) -o $@ $(SIZER)$(suffix $@).c
++	$(SIZERS_CC) $(CFLAGS_$(subst .,,$(suffix $@))) $(CPPFLAGS) -static -o $@ $(SIZER)$(suffix $@).c
+ 
+ $(WRAPPER_GENERATOR_CLASS): $(WRAPPER_GENERATOR_JAVA)
+ 	$(prep-target)
+@@ -358,6 +334,16 @@
+ 	    $(SIZER_DIR) $(XLIBTYPES) "sizer" $(subst .,,$(suffix $(basename $@)))
+ 
+ $(SIZES): $(SIZERS)
++ifdef CROSS_COMPILE_ARCH
++	@if [ "$(DOHACK)$@" = "true$(PREDEFINED_SIZES)" ]; then \
++	    $(ECHO) COPYING $(PREDEFINED_SIZES_TMPL) into $@; \
++	    $(CP) $(PREDEFINED_SIZES_TMPL) $@; \
++	    $(CHMOD) +w $@;\
++	else	\
++	    $(ECHO) GENERATING $@; \
++	    $(QEMU) $(WRAPPER_GENERATOR_DIR)/sizer$(suffix $@) > $@; \
++	fi
++else
+ 	@if [ "$(DOHACK)$@" = "true$(PREDEFINED_SIZES)" ]; then \
+ 	    $(ECHO) COPYING $(PREDEFINED_SIZES_TMPL) into $@; \
+ 	    $(CP) $(PREDEFINED_SIZES_TMPL) $@; \
+@@ -366,6 +352,7 @@
+ 	    $(ECHO) GENERATING $@; \
+ 	    $(WRAPPER_GENERATOR_DIR)/sizer$(suffix $@) > $@; \
+ 	fi
++endif
+ 	@if [ "$(DOCOMPARE)$(suffix $@)" = "true.64" ]; then \
+ 	    $(ECHO) COMPARING $@ and $(STORED_SIZES_TMPL_$(PLATFORM)_$(LIBARCH)); \
+ 	    $(DIFF) $@ $(STORED_SIZES_TMPL_$(PLATFORM)_$(LIBARCH)); \
+--- openjdk/jdk/make/common/Defs-linux.gmk
++++ openjdk/jdk/make/common/Defs-linux.gmk
+@@ -162,28 +162,6 @@
+   endif
+ endif
+ 
+-#
+-# Default optimization
+-#
+-
+-ifndef OPTIMIZATION_LEVEL
+-  ifeq ($(PRODUCT), java)
+-    OPTIMIZATION_LEVEL = HIGHER
+-  else
+-    OPTIMIZATION_LEVEL = LOWER
+-  endif
+-endif
+-ifndef FASTDEBUG_OPTIMIZATION_LEVEL
+-  FASTDEBUG_OPTIMIZATION_LEVEL = LOWER
+-endif
+-
+-CC_OPT/NONE     = 
+-CC_OPT/LOWER    = -O2
+-CC_OPT/HIGHER   = -O3
+-CC_OPT/HIGHEST  = -O3
+-
+-CC_OPT          = $(CC_OPT/$(OPTIMIZATION_LEVEL))
+-
+ # For all platforms, do not omit the frame pointer register usage. 
+ #    We need this frame pointer to make it easy to walk the stacks.
+ #    This should be the default on X86, but ia64 and amd64 may not have this
+@@ -191,7 +169,7 @@
+ CFLAGS_REQUIRED_aarch64 += -fno-omit-frame-pointer -fsigned-char -D_LITTLE_ENDIAN
+ CFLAGS_REQUIRED_alpha   += -mieee -D_LITTLE_ENDIAN
+ CFLAGS_REQUIRED_amd64   += -fno-omit-frame-pointer -D_LITTLE_ENDIAN
+-CFLAGS_REQUIRED_arm     += -D_LITTLE_ENDIAN -fsigned-char -D_LITTLE_ENDIAN
++CFLAGS_REQUIRED_arm     += -fno-omit-frame-pointer -fsigned-char -D_LITTLE_ENDIAN
+ CFLAGS_REQUIRED_hppa    +=
+ CFLAGS_REQUIRED_i586    += -fno-omit-frame-pointer -D_LITTLE_ENDIAN
+ CFLAGS_REQUIRED_ia64    += -fno-omit-frame-pointer -D_LITTLE_ENDIAN
+@@ -279,7 +257,7 @@
+   endif
+ endif
+ 
+-CFLAGS_OPT      = $(CC_OPT)
++CFLAGS_OPT      = $(OE_CFLAGS)
+ CFLAGS_DBG      = $(DEBUG_FLAG)
+ CFLAGS_COMMON += $(CFLAGS_REQUIRED)
+ 
+@@ -355,7 +333,7 @@
+ #
+ # -L paths for finding and -ljava
+ #
+-LDFLAGS_OPT     = -Xlinker -O1
++LDFLAGS_OPT     = $(OE_LDFLAGS)
+ LDFLAGS_COMMON += -L$(LIBDIR)/$(LIBARCH)
+ LDFLAGS_COMMON += -Wl,-soname=$(LIB_PREFIX)$(LIBRARY).$(LIBRARY_SUFFIX)
+ 
