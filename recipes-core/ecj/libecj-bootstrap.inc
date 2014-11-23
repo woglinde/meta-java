@@ -30,6 +30,9 @@ do_unpackpost() {
 
   # Move source into separate subdir.
   if [ -d org ]; then
+    if [ -d source/org ]; then
+      rm -r source/org
+    fi
     mv org source/
   fi
   # Remove stuff unneeded for the bootstrap compiler.
