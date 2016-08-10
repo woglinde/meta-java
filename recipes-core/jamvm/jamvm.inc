@@ -49,6 +49,9 @@ do_install_append_virtclass-native() {
 
 }
 
+# We really have valid non-symlink .so files
+INSANE_SKIP_${PN} = "dev-so"
+
 PRIVATE_LIBS = "libjvm.so"
 INSANE_SKIP_${PN} = "dev-so"
 
