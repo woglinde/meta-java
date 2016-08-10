@@ -34,6 +34,7 @@ do_compile() {
 # create a dummy for install to succeed
 
 JARFILENAME = "unix-${VER_UNIX}.jar"
+ALTJARFILENAMES = "unix.jar"
 
 do_install() {
     oe_jarinstall cgi-${VER_CGI}.jar cgi.jar
@@ -41,7 +42,6 @@ do_install() {
     oe_jarinstall debug-enable-${VER_DEBUG}.jar debug-enable.jar
     oe_jarinstall hexdump-${VER_HEXDUMP}.jar hexdump.jar
     oe_jarinstall io-${VER_IO}.jar io.jar
-    oe_jarinstall unix-${VER_UNIX}.jar unix.jar
     oe_libinstall -so libcgi-java ${D}${libdir_jni}
     oe_libinstall -so libunix-java ${D}${libdir_jni}
 }
